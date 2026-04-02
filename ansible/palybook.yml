@@ -1,0 +1,29 @@
+- hosts: web
+  become: yes
+
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+
+    - name: Copy app
+      copy:
+        src: ../app/
+        dest: /home/ubuntu/app/
+
+    - name: Build Docker image
+      command: docker build -t myapp /home/ubuntu/app/
+
+    - name: Stop old container
+      command: docker rm -f mycontainer
+      ignore_errors: yes
+
+    - name: Run container
+      command: docker run -d -p 80:80 --name mycontainer myapp
